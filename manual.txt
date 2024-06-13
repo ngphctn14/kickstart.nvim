@@ -1,0 +1,16 @@
+these are notes for myself in case i forgot some keybindings for this nvim setup.
+
+<C-g>: toggle nvim-tree
+space fb: telescope file browser
+<leader> /: fuzzy find within the file
+<C-<leader>>: open terminal
+<leader>-<leader>: lists existing buffers
+<leader> b: compile and run code
+<leader> c: copmile code
+<leader> r: run code
+<alt-123456789>: open the buffer corresponding to its position (left to right)
+<alt-c>: close the buffer
+<alt->>: move right
+<alt-<>: move left
+<alt-shift->>: move the opening buffer to the right by 1
+<alt-shift-<>: move the opening buffer to the left by 1
