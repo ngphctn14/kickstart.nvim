@@ -111,7 +111,7 @@ vim.opt.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
--- vim.opt.clipboard = 'unnamedplus'
+vim.opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -243,6 +243,7 @@ require('lazy').setup({
   -- keys can be used to configure plugin behavior/loading/etc.
   --
   -- Use `opts = {}` to force a plugin to be loaded.
+  { 'sevko/vim-nand2tetris-syntax' },
   { 'luochen1990/rainbow' },
   { 'nvim-tree/nvim-tree.lua' },
   {
@@ -825,7 +826,7 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.o.background = 'dark' -- or "light" for light mode
-      vim.cmd [[let g:gruvbox_contrast_dark='medium']]
+      vim.cmd [[let g:gruvbox_contrast_dark='hard']]
       vim.cmd.colorscheme 'gruvbox'
 
       vim.cmd [[
@@ -876,7 +877,10 @@ require('lazy').setup({
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font, set_vim_settings = true }
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        set_vim_settings = true,
+      }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
@@ -971,6 +975,12 @@ vim.cmd [[set laststatus=2]]
 vim.cmd [[set noshowmode]]
 
 vim.cmd [[
+function! ChangeDirectory()
+    let dir = expand('%:p:h')
+    execute 'TermExec cmd="cd ' . dir . ' "'
+    execute 'cd ' dir
+endfunction
+
 function! CompileCode()
     let dir = expand('%:p:h')
     let fileName = '%:t'
@@ -1009,6 +1019,7 @@ endfunction
 nnoremap <leader>c :call CompileCode()<CR>
 nnoremap <leader>r :call RunCode()<CR>
 nnoremap <leader>b :call CompileAndRun()<CR>
+nnoremap <leader>cd :call ChangeDirectory()<CR>
 
 set rnu
 set nocompatible
@@ -1076,7 +1087,7 @@ map('n', '<Space>bw', '<Cmd>BufferOrderByWindowNumber<CR>', opts)
 -- :BarbarDisable - very bad command, should never be used
 --
 
-vim.o.guifont = 'RobotoMono Nerd Font:h12'
+vim.o.guifont = 'RobotoMono Nerd Font:h11'
 
 vim.cmd [[ let g:rainbow_active = 1 ]]
 
@@ -1121,3 +1132,8 @@ require('nvim-tree').setup {
 }
 
 vim.keymap.set('n', '<C-g>', '<Cmd>NvimTreeToggle<CR>', opts)
+
+vim.cmd [[
+map <A-k> 1<C-u>
+map <A-j> 1<C-d>
+]]
