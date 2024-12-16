@@ -1,3 +1,4 @@
+vim.loader.enable()
 --[[
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -237,15 +238,27 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  'github/copilot.vim',
+  {
+    'sainnhe/gruvbox-material',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      -- Optionally configure and load the colorscheme
+      -- directly inside the plugin declaration.
+      vim.g.gruvbox_material_disable_italic_comment = true
+      vim.g.gruvbox_material_enable_bold = true
+    end,
+  },
+  { 'zaldih/themery.nvim' },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
   --
   -- Use `opts = {}` to force a plugin to be loaded.
-  { 'sevko/vim-nand2tetris-syntax' },
-  { 'luochen1990/rainbow' },
   { 'nvim-tree/nvim-tree.lua' },
+  { 'luochen1990/rainbow' },
   {
     'samjwill/nvim-unception',
     init = function()
@@ -313,27 +326,23 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
+  {
     'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        -- ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        -- ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-      }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
-    end,
+    event = 'VeryLazy',
+    opts = {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
+      },
+    },
   },
 
   -- NOTE: Plugins can specify dependencies.
@@ -371,6 +380,12 @@ require('lazy').setup({
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      {
+        'nvim-telescope/telescope-live-grep-args.nvim',
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = '^1.0.0',
+      },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -414,6 +429,7 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
+      pcall(require('telescope').load_extension, 'live_grep_args')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -813,44 +829,36 @@ require('lazy').setup({
       }
     end,
   },
-
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'morhetz/gruvbox',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.o.background = 'dark' -- or "light" for light mode
-      vim.cmd [[let g:gruvbox_contrast_dark='hard']]
-      vim.cmd.colorscheme 'gruvbox'
-
-      vim.cmd [[
-        "Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
-  "If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
-  "(see < http://sunaku.github.io/tmux-24bit-color.html#usage > for more information.)
-  if (empty($TMUX) && getenv('TERM_PROGRAM') != 'Apple_Terminal')
-    if (has("nvim"))
-      "For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
-      let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-    endif
-    "For Neovim > 0.1.5 and Vim > patch 7.4.1799 < https://github.com/vim/vim/commit/61be73bb0f965a895bfb064ea3e55476ac175162 >
-    "Based on Vim patch 7.4.1770 (`guicolors` option) < https://github.com/vim/vim/commit/8a633e3427b47286869aa4b96f2bfc1fe65b25cd >
-    " < https://github.com/neovim/neovim/wiki/Following-HEAD#20160511 >
-    if (has("termguicolors"))
-      set termguicolors
-    endif
-  endif
-      ]]
-
-      -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
-    end,
-  },
+  -- {
+  --   'saghen/blink.cmp',
+  --   lazy = false, -- lazy loading handled internally
+  --   -- optional: provides snippets for the snippet source
+  --   dependencies = 'rafamadriz/friendly-snippets',
+  --
+  --   -- use a release tag to download pre-built binaries
+  --   -- version = 'v0.*',
+  --   -- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+  --   build = 'cargo build --release',
+  --
+  --   opts = {
+  --     highlight = {
+  --       -- sets the fallback highlight groups to nvim-cmp's highlight groups
+  --       -- useful for when your theme doesn't support blink.cmp
+  --       -- will be removed in a future release, assuming themes add support
+  --       use_nvim_cmp_as_default = true,
+  --     },
+  --     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+  --     -- adjusts spacing to ensure icons are aligned
+  --     nerd_font_variant = 'normal',
+  --
+  --     -- experimental auto-brackets support
+  --     -- accept = { auto_brackets = { enabled = true } }
+  --
+  --     -- experimental signature help support
+  --     -- trigger = { signature_help = { enabled = true } }
+  --   },
+  -- },
+  { 'ellisonleao/gruvbox.nvim', priority = 1000, config = true, opts = ... },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
@@ -1132,8 +1140,80 @@ require('nvim-tree').setup {
 }
 
 vim.keymap.set('n', '<C-g>', '<Cmd>NvimTreeToggle<CR>', opts)
+vim.cmd [[let g:gruvbox_material_background='hard']]
+vim.cmd [[let g:gruvbox_material_better_performance = 1]]
 
 vim.cmd [[
 map <A-k> 1<C-u>
 map <A-j> 1<C-d>
 ]]
+-- Minimal config
+require('themery').setup {
+  themes = {
+    'gruvbox',
+    'blue',
+    'default',
+    'desert',
+    'evening',
+    'habamax',
+    'koehler',
+    'minicyan',
+    'morning',
+    'pablo',
+    'quiet',
+    'ron',
+    'slate',
+    'zellner',
+    'darkblue',
+    'delek',
+    'industry',
+    'lunaperche',
+    'minischeme',
+    'murphy',
+    'peachpuff',
+    'randomhue',
+    'shine',
+    'torte',
+    'gruvbox-material',
+  }, -- Your list of installed colorschemes.
+  livePreview = true, -- Apply theme while picking. Default to true.
+}
+
+-- Default options:
+require('gruvbox').setup {
+  terminal_colors = true, -- add neovim terminal colors
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = {
+    strings = false,
+    emphasis = false,
+    comments = false,
+    operators = false,
+    folds = false,
+  },
+  strikethrough = true,
+  invert_selection = false,
+  invert_signs = false,
+  invert_tabline = false,
+  invert_intend_guides = false,
+  inverse = true, -- invert background for search, diffs, statuslines and errors
+  contrast = 'hard', -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = false,
+}
+vim.cmd 'colorscheme gruvbox'
+local telescope = require 'telescope'
+local lga_actions = require 'telescope-live-grep-args.actions'
+
+-- first setup telescope
+telescope.setup {
+  -- your config
+}
+
+-- then load the extension
+telescope.load_extension 'live_grep_args'
+
+vim.keymap.set('n', '<space>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
