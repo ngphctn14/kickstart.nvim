@@ -167,7 +167,7 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagn
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 local powershell_options = {
-  shell = vim.fn.executable 'powershell' == 1 and 'powershell',
+  shell = vim.fn.executable 'pwsh' == 1 and 'pwsh',
   shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;',
   shellredir = '-RedirectStandardOutput %s -NoNewWindow -Wait',
   shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode',
@@ -238,6 +238,21 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  {
+    'chomosuke/typst-preview.nvim',
+    lazy = false, -- or ft = 'typst'
+    version = '1.*',
+    opts = {}, -- lazy.nvim will implicitly calls `setup {}`
+  },
+  { 'tikhomirov/vim-glsl' },
+  {
+    'rachartier/tiny-inline-diagnostic.nvim',
+    event = 'VeryLazy', -- Or `LspAttach`
+    priority = 1000, -- needs to be loaded in first
+    config = function()
+      require('tiny-inline-diagnostic').setup()
+    end,
+  },
   'github/copilot.vim',
   {
     'sainnhe/gruvbox-material',
@@ -250,7 +265,6 @@ require('lazy').setup({
       vim.g.gruvbox_material_enable_bold = true
     end,
   },
-  { 'zaldih/themery.nvim' },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -1140,6 +1154,7 @@ require('nvim-tree').setup {
 }
 
 vim.keymap.set('n', '<C-g>', '<Cmd>NvimTreeToggle<CR>', opts)
+
 vim.cmd [[let g:gruvbox_material_background='hard']]
 vim.cmd [[let g:gruvbox_material_better_performance = 1]]
 
@@ -1147,37 +1162,6 @@ vim.cmd [[
 map <A-k> 1<C-u>
 map <A-j> 1<C-d>
 ]]
--- Minimal config
-require('themery').setup {
-  themes = {
-    'gruvbox',
-    'blue',
-    'default',
-    'desert',
-    'evening',
-    'habamax',
-    'koehler',
-    'minicyan',
-    'morning',
-    'pablo',
-    'quiet',
-    'ron',
-    'slate',
-    'zellner',
-    'darkblue',
-    'delek',
-    'industry',
-    'lunaperche',
-    'minischeme',
-    'murphy',
-    'peachpuff',
-    'randomhue',
-    'shine',
-    'torte',
-    'gruvbox-material',
-  }, -- Your list of installed colorschemes.
-  livePreview = true, -- Apply theme while picking. Default to true.
-}
 
 -- Default options:
 require('gruvbox').setup {
@@ -1204,16 +1188,18 @@ require('gruvbox').setup {
   dim_inactive = false,
   transparent_mode = false,
 }
+
 vim.cmd 'colorscheme gruvbox'
-local telescope = require 'telescope'
-local lga_actions = require 'telescope-live-grep-args.actions'
 
--- first setup telescope
-telescope.setup {
-  -- your config
+require('lspconfig').glsl_analyzer.setup {}
+
+local cmp_nvim_lsp = require 'cmp_nvim_lsp'
+
+require('lspconfig').clangd.setup {
+  on_attach = on_attach,
+  capabilities = cmp_nvim_lsp.default_capabilities(),
+  cmd = {
+    'clangd',
+    '--offset-encoding=utf-16',
+  },
 }
-
--- then load the extension
-telescope.load_extension 'live_grep_args'
-
-vim.keymap.set('n', '<space>fg', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
